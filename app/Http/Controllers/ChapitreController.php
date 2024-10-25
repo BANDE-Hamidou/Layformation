@@ -44,17 +44,25 @@ class ChapitreController extends Controller
 
     // Stocker un nouveau chapitre
     public function store(StoreChapitreRequest $request): RedirectResponse
-    {
-        // Gérer le téléchargement de la vidéo
-        $videoPath = null;
-        if ($request->hasFile('chemin_video')) {
-            $videoPath = $request->file('chemin_video')->store('videos', 'public'); // Enregistre la vidéo dans le dossier public/videos
-        }
+{
+    $videoPath = null;
+    if ($request->hasFile('chemin_video')) {
+        $video = $request->file('chemin_video');
 
-        // Créer un nouveau chapitre avec les données validées
-        Chapitre::create(array_merge($request->validated(), ['chemin_video' => $videoPath]));
-        return redirect()->route('chapitres.index')->with('success', 'Chapitre créé avec succès.');
+        // Vérifions que le fichier est valide
+        if ($video->isValid()) {
+            $videoPath = $video->store('videos', 'public');
+
+            // Vérifions que le fichier a bien été enregistré
+            if (!Storage::disk('public')->exists($videoPath)) {
+                return back()->with('error', 'Erreur lors de l\'enregistrement de la vidéo');
+            }
+        }
     }
+
+    Chapitre::create(array_merge($request->validated(), ['chemin_video' => $videoPath]));
+    return redirect()->route('chapitres.index')->with('success', 'Chapitre créé avec succès.');
+}
 
     // Afficher un chapitre spécifique
     public function show(Chapitre $chapitre): View
@@ -72,21 +80,34 @@ class ChapitreController extends Controller
 
     // Mettre à jour un chapitre
     public function update(UpdateChapitreRequest $request, Chapitre $chapitre): RedirectResponse
-    {
-        // Gérer le téléchargement de la vidéo si une nouvelle vidéo est fournie
-        if ($request->hasFile('chemin_video')) {
-            // Supprimer l'ancienne vidéo si elle existe
-            if ($chapitre->chemin_video) {
-                Storage::disk('public')->delete($chapitre->chemin_video);
-            }
-            $videoPath = $request->file('chemin_video')->store('videos', 'public'); // Enregistre la nouvelle vidéo
-            $chapitre->chemin_video = $videoPath; // Met à jour le chemin de la vidéo
+{
+    // Créer un tableau avec les données validées
+    $validated = $request->validated();
+
+    // Gérer le téléchargement de la vidéo si une nouvelle vidéo est fournie
+    if ($request->hasFile('chemin_video')) {
+        // Supprimer l'ancienne vidéo si elle existe
+        if ($chapitre->chemin_video && Storage::disk('public')->exists($chapitre->chemin_video)) {
+            Storage::disk('public')->delete($chapitre->chemin_video);
         }
 
-        // Mettre à jour les autres champs du chapitre
-        $chapitre->update($request->validated());
-        return redirect()->route('chapitres.index')->with('success', 'Chapitre mis à jour avec succès.');
+        // Enregistrer la nouvelle vidéo
+        $videoPath = $request->file('chemin_video')->store('videos', 'public');
+
+        // Ajouter le nouveau chemin aux données validées
+        $validated['chemin_video'] = $videoPath;
+    } else {
+        // Garder l'ancien chemin de la vidéo si aucune nouvelle vidéo n'est fournie
+        $validated['chemin_video'] = $chapitre->chemin_video;
     }
+
+    // Mettre à jour le chapitre avec toutes les données
+    $chapitre->update($validated);
+
+    return redirect()->route('chapitres.index')->with('success', 'Chapitre mis à jour avec succès.');
+}
+
+
 
     // Supprimer un chapitre
     public function destroy(Chapitre $chapitre): RedirectResponse

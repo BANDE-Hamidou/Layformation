@@ -11,7 +11,7 @@ class StoreChapitreRequest extends FormRequest
         return true; // Autoriser la requête
     }
 
-    public function rules()
+        public function rules()
     {
         return [
             'module_id' => 'required|exists:modules,id',
