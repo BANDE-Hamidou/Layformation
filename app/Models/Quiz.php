@@ -1,15 +1,19 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Quiz extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'titre',
+        'chapitre_id',
+        'questions'
+    ];
 
-    protected $fillable = ['chapitre_id', 'question', 'options', 'correct_option'];
+    protected $casts = [
+        'questions' => 'array'
+    ];
 
     public function chapitre()
     {
