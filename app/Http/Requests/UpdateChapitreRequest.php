@@ -26,7 +26,7 @@ class UpdateChapitreRequest extends FormRequest
         return [
             'titre' => 'required|string|max:255', // Titre obligatoire, chaîne de caractères, max 255 caractères
             'description' => 'nullable|string', // Description facultative, chaîne de caractères
-            'chemin_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:10240', // Vidéo facultative, formats autorisés, max 10 Mo
+            'chemin_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:100240', // Vidéo facultative, formats autorisés, max 10 Mo
         ];
     }
 }

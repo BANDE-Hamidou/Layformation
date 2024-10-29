@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Quiz;
@@ -8,15 +7,13 @@ use App\Models\Question;
 use App\Models\Option; // Assurez-vous d'importer le modèle Option
 use App\Http\Requests\StoreQuizRequest;
 use App\Http\Requests\UpdateQuizRequest;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class QuizController extends Controller
 {
-    // Afficher la liste des quizzes avec recherche et pagination
-    public function index(Request $request): View
+    public function index()
     {
+<<<<<<< HEAD
         $search = $request->input('search'); // Recherche si un terme est spécifié
 
         if ($search) {
@@ -32,15 +29,19 @@ class QuizController extends Controller
         $noResults = $quizzes->isEmpty(); // True si aucun quiz n'a été trouvé
 
         return view('quiz.index', compact('quizzes', 'search', 'noResults'));
+=======
+        $quizzes = Quiz::with('chapitre')->paginate(10);
+        return view('quizzes.index', compact('quizzes'));
+>>>>>>> origin/main
     }
 
-    // Afficher le formulaire de création d'un quiz
-    public function create(): View
+    public function create()
     {
         $chapitres = Chapitre::all();
-        return view('quiz.create', compact('chapitres'));
+        return view('quizzes.create', compact('chapitres'));
     }
 
+<<<<<<< HEAD
     // Stocker un nouveau quiz
     public function store(Request $request): RedirectResponse
     {
@@ -76,33 +77,85 @@ class QuizController extends Controller
         }
 
         return redirect()->route('quiz.index')->with('success', 'Quiz créé avec succès.');
-    }
-
-    // Afficher un quiz spécifique
-    public function show(Quiz $quiz): View
+=======
+    public function store(StoreQuizRequest $request)
     {
-        return view('quiz.show', compact('quiz'));
+        $validatedData = $request->validated();
+
+        // Créer le quiz avec les données validées
+        $quiz = Quiz::create([
+            'titre' => $validatedData['titre'],
+            'chapitre_id' => $validatedData['chapitre_id'],
+            'questions' => $validatedData['questions']
+        ]);
+
+        return redirect()
+            ->route('quizzes.index')
+            ->with('success', 'Quiz créé avec succès');
+>>>>>>> origin/main
     }
 
-    // Afficher le formulaire d'édition d'un quiz
-    public function edit(Quiz $quiz): View
+    public function show(Quiz $quiz)
+    {
+        return view('quizzes.show', compact('quiz'));
+    }
+
+    public function edit(Quiz $quiz)
     {
         $chapitres = Chapitre::all();
+<<<<<<< HEAD
         $questions = $quiz->questions; // Récupérer les questions associées au quiz
         return view('quiz.edit', compact('quiz', 'chapitres', 'questions'));
+=======
+        return view('quizzes.edit', compact('quiz', 'chapitres'));
+>>>>>>> origin/main
     }
 
-    // Mettre à jour un quiz
-    public function update(UpdateQuizRequest $request, Quiz $quiz): RedirectResponse
+    public function update(UpdateQuizRequest $request, Quiz $quiz)
     {
-        $quiz->update($request->validated());
-        return redirect()->route('quiz.index')->with('success', 'Quiz mis à jour avec succès.');
+        $validatedData = $request->validated();
+
+        $quiz->update([
+            'titre' => $validatedData['titre'],
+            'chapitre_id' => $validatedData['chapitre_id'],
+            'questions' => $validatedData['questions']
+        ]);
+
+        return redirect()
+            ->route('quizzes.index')
+            ->with('success', 'Quiz mis à jour avec succès');
     }
 
-    // Supprimer un quiz
-    public function destroy(Quiz $quiz): RedirectResponse
+    public function destroy(Quiz $quiz)
     {
         $quiz->delete();
-        return redirect()->route('quiz.index')->with('success', 'Quiz supprimé avec succès.');
+        return redirect()
+            ->route('quizzes.index')
+            ->with('success', 'Quiz supprimé avec succès');
+    }
+
+    public function verifyAnswer(Request $request, Quiz $quiz)
+    {
+        $questionIndex = $request->input('question_index');
+        $userAnswer = $request->input('answer');
+
+        // Récupérer la question spécifique du quiz
+        $questions = $quiz->questions;
+        $question = $questions[$questionIndex] ?? null;
+
+        if (!$question) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Question non trouvée'
+            ]);
+        }
+
+        $isCorrect = $question['correct_answer'] === $userAnswer;
+
+        return response()->json([
+            'success' => true,
+            'correct' => $isCorrect,
+            'message' => $isCorrect ? 'Bonne réponse !' : 'Mauvaise réponse. Essayez encore !'
+        ]);
     }
 }

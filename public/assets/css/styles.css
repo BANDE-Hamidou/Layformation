@@ -439,3 +439,6 @@ input[type="submit"]:hover {
 }
 
 
+.affich{
+    display: flex;
+}

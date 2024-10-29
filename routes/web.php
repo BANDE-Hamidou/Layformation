@@ -139,7 +139,8 @@ Route::resource('modules', ModuleController::class);
 Route::resource('chapitres', ChapitreController::class);
 
 // Routes pour les Quiz
-Route::resource('quiz', QuizController::class);
+Route::resource('quizzes', QuizController::class);
+Route::post('quizzes/{quiz}/verify-answer', [QuizController::class, 'verifyAnswer'])->name('quizzes.verify-answer');
 
 Route::resource('resources', ResourceController::class);
 

@@ -157,7 +157,7 @@
             </div>
 
             <div class="nav-item" data-target="reports">
-                <a href="{{ route('quiz.index') }}" style="color: inherit; text-decoration: none;">Quiz</a>
+                <a href="{{ route('quizzes.index') }}" style="color: inherit; text-decoration: none;">Quiz</a>
             </div>
 
            {{-- <div class="nav-item" data-target="settings">

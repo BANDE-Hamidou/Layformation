@@ -11,13 +11,13 @@ class StoreChapitreRequest extends FormRequest
         return true; // Autoriser la requête
     }
 
-    public function rules()
+        public function rules()
     {
         return [
             'module_id' => 'required|exists:modules,id',
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'chemin_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:10240',
+            'chemin_video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:100240',
         ];
     }
 }
